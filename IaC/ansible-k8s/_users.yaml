@@ -1,0 +1,12 @@
+# 1: Configure sudo permissions for ansible user
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Add user to sudoers
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^zhangyanll'
+        line: 'zhangyanll ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'

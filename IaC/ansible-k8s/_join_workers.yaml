@@ -1,0 +1,15 @@
+# 5: Join worker nodes to the K8s cluster
+---
+- hosts: workers
+  become: yes
+  tasks:
+    - name: Copy join command to worker
+      copy:
+        src: /tmp/k8s_join_command.sh
+        dest: /tmp/k8s_join_command.sh
+        mode: '0755'
+
+    - name: Join the Kubernetes cluster
+      command: sh /tmp/k8s_join_command.sh
+      args:
+        creates: /etc/kubernetes/kubelet.conf

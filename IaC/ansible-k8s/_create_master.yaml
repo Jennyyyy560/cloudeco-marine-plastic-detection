@@ -1,0 +1,47 @@
+# 4: Initialise K8s master node and install Flannel CNI
+---
+- hosts: masters
+  become: yes
+  tasks:
+    # Initialise cluster with pod CIDR matching Flannel's default range
+    - name: Initialize Kubernetes cluster
+      command: >
+        kubeadm init
+        --pod-network-cidr=10.244.0.0/16
+        --apiserver-advertise-address={{ ansible_default_ipv4.address }}
+      args:
+        creates: /etc/kubernetes/admin.conf
+      register: kubeadm_output
+
+    - name: Create .kube directory for user
+      file:
+        path: /home/zhangyanll/.kube
+        state: directory
+        owner: zhangyanll
+        group: zhangyanll
+        mode: '0755'
+
+    - name: Copy kubeconfig to user home
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/zhangyanll/.kube/config
+        remote_src: yes
+        owner: zhangyanll
+        group: zhangyanll
+        mode: '0644'
+
+    # Flannel provides pod-to-pod networking across nodes
+    - name: Install Flannel CNI plugin
+      become: no
+      command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      environment:
+        KUBECONFIG: /home/zhangyanll/.kube/config
+
+    # Generate a join token and save it for workers to use
+    - name: Get join command
+      command: kubeadm token create --print-join-command
+      register: join_command
+
+    - name: Save join command locally
+      become: no          
+      local_action: copy content="{{ join_command.stdout_lines[0] }}" dest=/tmp/k8s_join_command.sh
