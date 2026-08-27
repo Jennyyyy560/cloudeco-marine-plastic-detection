@@ -1,0 +1,50 @@
+# A Deployment's function: which Docker image to run, how many copies to keep alive, 
+# and what CPU/memory each pod is allowed to use.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudeco
+  labels:
+    app: cloudeco
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudeco
+  template:
+    metadata:
+      labels:
+        app: cloudeco
+    spec:
+      containers:
+        - name: cloudeco
+          image: yzha1437/cloudeco:latest
+          imagePullPolicy: Always      # pull the latest image 
+          ports:
+            - containerPort: 8000
+
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "1Gi"
+            limits:
+              cpu: "1.0"
+              memory: "2Gi"
+
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            failureThreshold: 5
+
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 3
+
+        
