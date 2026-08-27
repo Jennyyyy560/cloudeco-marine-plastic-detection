@@ -1,14 +1,52 @@
 cat > .gitignore << 'EOF'
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.eggs/
 .venv/
 venv/
+venv311/
+env/
+ENV/
 .env
 
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Terraform
 IaC/terraform/.terraform/
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
 *.tfvars
+crash.log
+crash.*.log
 
+# Ansible
 *.retry
+
+# Secrets / Keys — 千万不能传
+key/
+*.pem
+*.key
+*.pfx
+*.p12
+*credentials*.json
+service-account*.json
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Logs / misc
+*.log
+*.zip
+*.tar.gz
 EOF
+
+
